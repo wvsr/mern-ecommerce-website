@@ -2,6 +2,11 @@ const User = require('../models/userModel.js')
 const asyncHandler = require('express-async-handler')
 const generateToken = require('../utills/generateToken.js')
 
+// @Route POST api/user/
+// @Desc create user object
+// @Access Public
+// @Param {name, email, password}
+
 const createUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body
   const userExists = await User.findOne({ email })
@@ -26,6 +31,11 @@ const createUser = asyncHandler(async (req, res) => {
   })
 })
 
+// @Route POST api/user/change-password
+// @Desc change user password
+// @Access Private
+// @Param {password, newPassword}
+
 const changePassword = asyncHandler(async (req, res) => {
   const { password, newPassword } = req.body
   const user = await User.findById(req.user._id)
@@ -39,6 +49,11 @@ const changePassword = asyncHandler(async (req, res) => {
   await user.save()
   res.json({ message: 'Password changed successfully' })
 })
+
+// @Route POST api/user/
+// @Desc login user with password
+// @Access Public
+// @Param {email, password}
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body
@@ -62,15 +77,59 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 })
 
+// @Route DELETE api/user/
+// @Desc delete user object
+// @Access Privates
+// @Param {userId}
+
 const deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findOne(req.user.id)
+  const user = await User.findById(req.user._id)
   await user.remove()
-  res.sendStatus(202)
+  res.json({ message: 'User removed successfully' })
 })
+
+// @Route GET api/user/
+// @Desc get login user
+// @Access Privates
 
 const getUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id).select('-password')
   res.json(user)
+})
+
+// @Route GET api/users/
+// @Desc get all users
+// @Access Privates, Admin
+
+const getAllUsers = asyncHandler(async (req, res) => {
+  const pageOptions = {
+    page: parseInt(req.query.page, 10) || 0,
+    limit: parseInt(req.query.limit, 10) || 20,
+  }
+  const userCount = await User.find({}).countDocuments()
+  const numberOfPages = userCount / pageOptions.limit
+  const users = await User.find({})
+    .skip(pageOptions.page * pageOptions.limit)
+    .limit(pageOptions.limit)
+
+  res.json({
+    users,
+    page: pageOptions.page,
+    numberOfPages,
+  })
+})
+
+// @Route GET api/users/:userId
+// @Desc get single user
+// @Access Privates, Admin
+
+const getSingleUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).select('-password')
+  if (user) {
+    res.json(user)
+  }
+  res.status(404)
+  throw new Error('User not found')
 })
 
 module.exports = {
@@ -79,4 +138,6 @@ module.exports = {
   loginUser,
   deleteUser,
   getUser,
+  getAllUsers,
+  getSingleUsers,
 }

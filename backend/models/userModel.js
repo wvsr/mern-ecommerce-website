@@ -32,6 +32,12 @@ const userSchema = mongoose.Schema(
       default: false,
     },
     cart: [cartSchema],
+    buyingHistory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+      },
+    ],
   },
   {
     timestamps: true,

@@ -6,7 +6,7 @@ const orderSchema = mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  products: [
+  orderItems: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product',
@@ -21,10 +21,9 @@ const orderSchema = mongoose.Schema({
     type: String,
     required: true,
     default: 'pending',
-    enum: ['pending', 'completed'],
-    lowercase: true,
+    enum: ['pending', 'delivered', 'cancelled'],
   },
-  location: {
+  shippingLocation: {
     type: String,
     required: true,
   },
