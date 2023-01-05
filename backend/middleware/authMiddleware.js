@@ -18,9 +18,6 @@ const authUser = asyncHandler(async (req, res, next) => {
       res.status(401)
       throw new Error('Not authorized, token failed')
     }
-  } else {
-    res.status(401)
-    throw new Error('Invalid token')
   }
 
   if (!token) {
@@ -28,6 +25,8 @@ const authUser = asyncHandler(async (req, res, next) => {
     throw new Error('No token found')
   }
 })
+
+// check if the user is admin
 const adminUser = asyncHandler(async (req, res, next) => {
   if (req.user && req.user.isAdmin) {
     next()

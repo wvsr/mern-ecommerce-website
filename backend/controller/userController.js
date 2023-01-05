@@ -1,13 +1,18 @@
 const User = require('../models/userModel.js')
 const asyncHandler = require('express-async-handler')
 const generateToken = require('../utills/generateToken.js')
-
+const mongoose = require('mongoose')
+const { validationResult } = require('express-validator')
 // @Route POST api/user/
 // @Desc create user object
 // @Access Public
 // @Param {name, email, password}
 
 const createUser = asyncHandler(async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
   const { name, email, password } = req.body
   const userExists = await User.findOne({ email })
   if (userExists) {
@@ -31,31 +36,16 @@ const createUser = asyncHandler(async (req, res) => {
   })
 })
 
-// @Route POST api/user/change-password
-// @Desc change user password
-// @Access Private
-// @Param {password, newPassword}
-
-const changePassword = asyncHandler(async (req, res) => {
-  const { password, newPassword } = req.body
-  const user = await User.findById(req.user._id)
-  const checkPassword = await User.matchPassword(password)
-
-  if (!checkPassword) {
-    res.status(401)
-    throw new Error('Incorrect password')
-  }
-  user.password = newPassword
-  await user.save()
-  res.json({ message: 'Password changed successfully' })
-})
-
 // @Route POST api/user/
 // @Desc login user with password
 // @Access Public
 // @Param {email, password}
 
 const loginUser = asyncHandler(async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
   const { email, password } = req.body
   const user = await User.findOne({ email })
   if (!user) {
@@ -77,6 +67,30 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 })
 
+// @Route POST api/user/change-password
+// @Desc change user password
+// @Access Private
+// @Param {password, newPassword}
+
+const changePassword = asyncHandler(async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+
+  const { password, newPassword } = req.body
+  const user = await User.findById(req.user._id)
+  const checkPassword = user && (await user.matchPassword(password))
+
+  if (!checkPassword) {
+    res.status(401)
+    throw new Error('Incorrect password')
+  }
+  user.password = newPassword
+  await user.save()
+  res.json({ message: 'Password changed successfully' })
+})
+
 // @Route DELETE api/user/
 // @Desc delete user object
 // @Access Privates
@@ -88,6 +102,26 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ message: 'User removed successfully' })
 })
 
+// @Route DELETE api/user/:id
+// @Desc delete user by id
+// @Access Privates
+// @Param {userId}
+
+const deleteUserById = asyncHandler(async (req, res) => {
+  // validate user id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400)
+    throw new Error('Invalid user id')
+  }
+  const user = await User.findById(req.params.id)
+  if (!user) {
+    res.status(404)
+    throw new Error('User not found')
+  }
+  await user.remove()
+  res.status(202).json({ message: 'User removed successfully' })
+})
+
 // @Route GET api/user/
 // @Desc get login user
 // @Access Privates
@@ -97,7 +131,7 @@ const getUser = asyncHandler(async (req, res) => {
   res.json(user)
 })
 
-// @Route GET api/users/
+// @Route GET api/users/all
 // @Desc get all users
 // @Access Privates, Admin
 
@@ -107,7 +141,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
     limit: parseInt(req.query.limit, 10) || 20,
   }
   const userCount = await User.find({}).countDocuments()
-  const numberOfPages = userCount / pageOptions.limit
+  const numberOfPages = Math.round(userCount / pageOptions.limit)
   const users = await User.find({})
     .skip(pageOptions.page * pageOptions.limit)
     .limit(pageOptions.limit)
@@ -124,9 +158,14 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @Access Privates, Admin
 
 const getSingleUser = asyncHandler(async (req, res) => {
+  // validating user id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    res.status(400)
+    throw new Error('Invalid user id')
+  }
   const user = await User.findById(req.params.id).select('-password')
   if (user) {
-    res.json(user)
+    return res.json(user)
   }
   res.status(404)
   throw new Error('User not found')
@@ -139,5 +178,6 @@ module.exports = {
   deleteUser,
   getUser,
   getAllUsers,
-  getSingleUsers,
+  getSingleUser,
+  deleteUserById,
 }
