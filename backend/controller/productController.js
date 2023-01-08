@@ -151,6 +151,37 @@ const deleteReview = asyncHandler(async (req, res) => {
   throw new Error('Product not found')
 })
 
+//@Route PUT /api/product/change-status/:id
+//@Desc change product status
+//@Access Private, Admin Only
+
+const changeStatus = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+  if (product) {
+    product.active = !product.active
+    product.save()
+  }
+
+  res.status(404)
+  throw new Error('Product not found')
+})
+
+//@Route GET /product/search
+//@Desc search product
+//@Access Private
+
+const searchProduct = asyncHandler(async (req, res) => {
+  const { search } = req.query
+  const searchTerm = RegExp(search, 'i')
+
+  const products = await Product.find(
+    { $text: { $search: searchTerm } },
+    { score: { $meta: 'textScore' } }
+  ).sort({ score: { $meta: 'textScore' } })
+
+  res.json(products)
+})
+
 module.exports = {
   getAllProducts,
   createProduct,
@@ -160,4 +191,6 @@ module.exports = {
   addReview,
   getReviews,
   deleteReview,
+  changeStatus,
+  searchProduct,
 }

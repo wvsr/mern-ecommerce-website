@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler')
 const generateToken = require('../utills/generateToken.js')
 const mongoose = require('mongoose')
 const { validationResult } = require('express-validator')
+
 // @Route POST api/user/
 // @Desc create user object
 // @Access Public

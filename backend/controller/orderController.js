@@ -112,10 +112,43 @@ const deleteOrder = asyncHandler(async (req, res) => {
   throw new Error('Order not found')
 })
 
+// @Route PUT api/order/change-status/:id/:status
+// @Desc Change order status
+// @Access Private, Admin only
+
+const changeOrderStatus = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id)
+  const { status } = req.params
+  if (order) {
+    switch (status) {
+      case 'pending':
+        order.status = 'pending'
+        break
+      case 'shipping':
+        order.status = 'shipping'
+        break
+      case 'delivered':
+        order.status = 'delivered'
+        break
+      case 'canceled':
+        order.status = 'canceled'
+        break
+      default:
+        throw new Error('Unknown status: ' + order.status)
+    }
+    order.save()
+    res.status(202)
+    res.json({ message: 'order status changed successfully' })
+  }
+
+  res.status(404)
+  throw new Error('Order not found')
+})
 module.exports = {
   newOrder,
   getAllOrders,
   getOrderById,
   getMyOrders,
   deleteOrder,
+  changeOrderStatus,
 }
