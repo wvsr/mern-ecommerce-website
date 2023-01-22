@@ -4,11 +4,11 @@ function carouselHolder() {
   return (
     <div
       role='status'
-      class='h-56 sm:h-64 xl:h-80 2xl:h-96 border-gray-200 rounded shadow animate-pulse opacity-90 mx-3'
+      className='h-56 sm:h-64 xl:h-80 2xl:h-96 border-gray-200 rounded shadow animate-pulse opacity-90 mx-3'
     >
-      <div class='flex items-center justify-center h-full bg-gray-300 rounded'>
+      <div className='flex items-center justify-center h-full bg-gray-300 rounded'>
         <svg
-          class='w-12 h-12 text-gray-200 dark:text-gray-600'
+          className='w-12 h-12 text-gray-200 dark:text-gray-600'
           xmlns='http://www.w3.org/2000/svg'
           aria-hidden='true'
           fill='currentColor'

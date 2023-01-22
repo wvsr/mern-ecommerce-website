@@ -42,6 +42,7 @@ router.post(
   authUser,
   changePassword
 )
+
 router.post(
   '/register',
   [
@@ -54,6 +55,7 @@ router.post(
   ],
   createUser
 )
+
 router.get('/all', authUser, getAllUsers)
 router
   .route('/single/:id')

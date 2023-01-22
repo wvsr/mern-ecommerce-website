@@ -1,57 +1,113 @@
-import React from 'react'
+import React, { useState, useContext } from 'react'
+import { AppContext } from '../context/AppContext'
+import axios from 'axios'
 
 export default function Register() {
+  const { user, setUser } = useContext(AppContext).auth
+  const [userName, setUserName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [errors, setErrors] = useState([])
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setErrors([])
+    setSuccess(false)
+    try {
+      const submitUser = await axios.post('/user/register', {
+        name: userName,
+        password,
+        email,
+      })
+      setUser(user)
+      localStorage.setItem('user', JSON.stringify(submitUser?.data))
+      setSuccess(true)
+    } catch (error) {
+      console.error(
+        error?.response?.data?.errors || [{ msg: error.response.data?.message }]
+      )
+      setErrors(
+        error?.response?.data?.errors || [{ msg: error.response.data?.message }]
+      )
+    }
+  }
   return (
     <div className='py-16 flex justify-center items-center'>
-      <form className='max-w-sm w-full px-4 bg-blue-50 rounded-lg py-5 mx-3'>
-        <div class='mb-6'>
+      <form
+        className='max-w-sm w-full px-4 bg-blue-50 rounded-lg py-5 mx-3'
+        onSubmit={handleSubmit}
+      >
+        <div className='pt-1 pb-4 space-y-2'>
+          {errors &&
+            errors.map((err, i) => (
+              <div
+                className='bg-red-300 rounded-lg text-red-900 w-full py-4 px-4 border border-red-500'
+                key={i}
+              >
+                {err.msg}
+              </div>
+            ))}
+          {success && (
+            <div className='bg-green-300 rounded-lg text-green-900 w-full py-4 px-4 border border-green-500'>
+              User Created
+            </div>
+          )}
+        </div>
+        <div className='mb-6'>
           <label
-            for='email'
-            class='block mb-2 text-sm font-medium text-gray-900'
+            htmlFor='email'
+            className='block mb-2 text-sm font-medium text-gray-900'
           >
             Your name
           </label>
           <input
             type='text'
             id='name'
-            class='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
-            placeholder='name@flowbite.com'
+            className='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+            placeholder='Your name'
+            onChange={(e) => setUserName(e.target.value)}
+            value={userName}
             required
           />
         </div>
-        <div class='mb-6'>
+        <div className='mb-6'>
           <label
-            for='name'
-            class='block mb-2 text-sm font-medium text-gray-900'
+            htmlFor='name'
+            className='block mb-2 text-sm font-medium text-gray-900'
           >
             Your email
           </label>
           <input
             type='email'
             id='email'
-            class='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
-            placeholder='name@flowbite.com'
+            className='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+            placeholder='name@gmail.com'
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}
             required
           />
         </div>
-        <div class='mb-6'>
+        <div className='mb-6'>
           <label
-            for='password'
-            class='block mb-2 text-sm font-medium text-gray-900'
+            htmlFor='password'
+            className='block mb-2 text-sm font-medium text-gray-900'
           >
             Your password
           </label>
           <input
             type='password'
             id='password'
-            class='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+            className='shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+            onChange={(e) => setPassword(e.target.value)}
+            value={password}
             required
           />
         </div>
 
         <button
           type='submit'
-          class='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
+          className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
         >
           Register new account
         </button>

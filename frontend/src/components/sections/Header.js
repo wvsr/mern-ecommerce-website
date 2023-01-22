@@ -1,37 +1,40 @@
 import { useState, useContext, Fragment } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { AppContext } from '../../context/AppContext'
+// components
+import Modal from '../Modal'
+// icons
 import { AiOutlineSearch, AiOutlineDown, AiOutlineMenu } from 'react-icons/ai'
 import { RiShoppingCart2Line } from 'react-icons/ri'
 import { Menu, Transition } from '@headlessui/react'
-import Modal from './Modal'
-export default function Header() {
-  const navigation = [{ name: 'Home', href: 'Home' }]
-  const [searchModal, setSearchModal] = useState(false)
-  const SearchBox = () => {
-    return (
-      <form>
-        <div class='max-w-md mx-auto'>
-          <div class='relative flex items-center w-full h-12 rounded-lg focus-within:shadow-sm bg-white overflow-hidden border border-indigo-200'>
-            <div class='grid place-items-center h-full w-12 text-gray-300'>
-              <AiOutlineSearch className='text-xl' />
-            </div>
 
-            <input
-              class='peer h-full w-full outline-none text-sm text-gray-700 pr-2'
-              type='text'
-              id='search'
-              placeholder='Search something..'
-            />
-          </div>
-        </div>
-      </form>
-    )
+export default function Header() {
+  const navigation = [
+    { name: 'Home', href: 'Home' },
+    { name: 'Setting', href: 'setting', private: true },
+  ]
+  const { user, setUser } = useContext(AppContext).auth
+
+  const [searchModal, setSearchModal] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+
+  const navigate = useNavigate()
+
+  const findProducts = (event) => {
+    event.preventDefault()
+    navigate({
+      pathname: 'search',
+      search: `?q=${searchInput}`,
+    })
   }
+
   return (
     <>
-      <nav class='bg-slate-100 flex justify-between border-gray-200 px-2 sm:px-4 py-2.5 md:py-1 rounded top-0 z-50 sticky'>
+      <nav className='bg-slate-100 flex justify-between items-center border-gray-200 px-2 sm:px-4 py-2.5 md:py-1 rounded top-0 z-50 sticky'>
         <div id='logo flex-1'>
-          <h1>SAMISTORE</h1>
+          <NavLink to=''>
+            <h1 className='text-2xl bold'>SAMISTORE</h1>
+          </NavLink>
         </div>
         <div className='flex justify-center items-center gap-6'>
           <ul className='space-x-2 text-gray-700 fond-bold capitalize hidden md:block'>
@@ -50,23 +53,46 @@ export default function Header() {
               )
             })}
           </ul>
+          {/* xl search box */}
           <div className='w-full hidden md:block'>
-            <SearchBox />
+            <form onSubmit={findProducts}>
+              <div className='max-w-md mx-auto'>
+                <div className='relative flex items-center w-full h-12 rounded-lg focus-within:shadow-sm bg-white overflow-hidden border-2 border-indigo-500 '>
+                  <div className='grid place-items-center h-full w-12 text-gray-500'>
+                    <AiOutlineSearch className='text-xl' />
+                  </div>
+
+                  <input
+                    className='peer h-full w-full outline-none text-sm text-gray-700 pr-2 '
+                    type='text'
+                    id='search'
+                    placeholder='Search something..'
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    value={searchInput}
+                  />
+                </div>
+              </div>
+            </form>
           </div>
+          {/* shopping cart */}
           <div>
-            <RiShoppingCart2Line className='text-2xl' />
+            <NavLink to='cart'>
+              <RiShoppingCart2Line className='text-2xl' />
+            </NavLink>
           </div>
+          {/* mobile search box */}
           <div>
             <AiOutlineSearch
               className='text-2xl md:hidden'
               onClick={() => setSearchModal(true)}
             />
           </div>
+          {/* mobile menu */}
           <div className='md:hidden'>
             <Menu as='div' className='relative inline-block text-left'>
               <div>
                 <Menu.Button className='inline-flex w-full justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75'>
-                  <AiOutlineMenu />
+                  <AiOutlineMenu className='text-xl' />
                 </Menu.Button>
               </div>
               <Transition
@@ -106,7 +132,24 @@ export default function Header() {
         </div>
       </nav>
       <Modal isOpen={searchModal} closeModal={setSearchModal}>
-        <SearchBox />
+        <form onSubmit={findProducts}>
+          <div className='max-w-md mx-auto'>
+            <div className='relative flex items-center w-full h-12 rounded-lg focus-within:shadow-sm bg-white overflow-hidden border-2 border-indigo-500 '>
+              <div className='grid place-items-center h-full w-12 text-gray-500'>
+                <AiOutlineSearch className='text-xl' />
+              </div>
+
+              <input
+                className='peer h-full w-full outline-none text-sm text-gray-700 pr-2 '
+                type='text'
+                id='search'
+                placeholder='Search something..'
+                onChange={(e) => setSearchInput(e.target.value)}
+                value={searchInput}
+              />
+            </div>
+          </div>
+        </form>
       </Modal>
     </>
   )
