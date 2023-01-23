@@ -51,7 +51,10 @@ router.post(
       max: 24,
     }),
     body('email', 'You enterd invalid email address').isEmail(),
-    body('password', 'this password is invalid').isLength({ min: 8, max: 62 }),
+    body('password', 'Password must be 8 charechter long').isLength({
+      min: 8,
+      max: 62,
+    }),
   ],
   createUser
 )

@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 export default function Register() {
   const { user, setUser } = useContext(AppContext).auth
@@ -9,11 +10,13 @@ export default function Register() {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState([])
   const [success, setSuccess] = useState(false)
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrors([])
     setSuccess(false)
+
     try {
       const submitUser = await axios.post('/user/register', {
         name: userName,
@@ -21,12 +24,11 @@ export default function Register() {
         email,
       })
       setUser(user)
+
       localStorage.setItem('user', JSON.stringify(submitUser?.data))
       setSuccess(true)
+      setTimeout(() => navigate('/'), 2000)
     } catch (error) {
-      console.error(
-        error?.response?.data?.errors || [{ msg: error.response.data?.message }]
-      )
       setErrors(
         error?.response?.data?.errors || [{ msg: error.response.data?.message }]
       )

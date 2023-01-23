@@ -1,6 +1,7 @@
 import { useState, useContext, Fragment } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../../context/AppContext'
+import useAuth from '../../hooks/useAuth'
 // components
 import Modal from '../Modal'
 // icons
@@ -11,9 +12,13 @@ import { Menu, Transition } from '@headlessui/react'
 export default function Header() {
   const navigation = [
     { name: 'Home', href: 'Home' },
-    { name: 'Setting', href: 'setting', private: true },
+    { name: 'Setting', href: 'setting', private: false },
   ]
-  const { user, setUser } = useContext(AppContext).auth
+  const { isAuth, user } = useAuth()
+
+  const filteredNavigation = isAuth
+    ? navigation
+    : navigation.filter((item) => false !== item.private)
 
   const [searchModal, setSearchModal] = useState(false)
   const [searchInput, setSearchInput] = useState('')
@@ -38,7 +43,7 @@ export default function Header() {
         </div>
         <div className='flex justify-center items-center gap-6'>
           <ul className='space-x-2 text-gray-700 fond-bold capitalize hidden md:block'>
-            {navigation.map((nav) => {
+            {filteredNavigation.map((nav) => {
               return (
                 <li>
                   <NavLink
@@ -106,7 +111,7 @@ export default function Header() {
               >
                 <Menu.Items className='absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
                   <div className='px-1 py-1 '>
-                    {navigation.map((nav) => {
+                    {filteredNavigation.map((nav) => {
                       return (
                         <Menu.Item>
                           {({ active }) => (
