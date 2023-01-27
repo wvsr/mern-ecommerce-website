@@ -79,9 +79,9 @@ const changePassword = asyncHandler(async (req, res) => {
     return res.status(400).json({ errors: errors.array() })
   }
 
-  const { password, newPassword } = req.body
+  const { oldPassword, newPassword } = req.body
   const user = await User.findById(req.user._id)
-  const checkPassword = user && (await user.matchPassword(password))
+  const checkPassword = user && (await user.matchPassword(oldPassword))
 
   if (!checkPassword) {
     res.status(401)

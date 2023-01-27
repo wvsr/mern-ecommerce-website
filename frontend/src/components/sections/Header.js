@@ -11,14 +11,14 @@ import { Menu, Transition } from '@headlessui/react'
 
 export default function Header() {
   const navigation = [
-    { name: 'Home', href: 'Home' },
-    { name: 'Setting', href: 'setting', private: false },
+    { name: 'Profile', href: 'profile', private: true },
+    { name: 'Dashboard', href: 'dashboard', private: true },
   ]
   const { isAuth, user } = useAuth()
 
   const filteredNavigation = isAuth
     ? navigation
-    : navigation.filter((item) => false !== item.private)
+    : navigation.filter((item) => true !== item.private)
 
   const [searchModal, setSearchModal] = useState(false)
   const [searchInput, setSearchInput] = useState('')
@@ -27,10 +27,12 @@ export default function Header() {
 
   const findProducts = (event) => {
     event.preventDefault()
-    navigate({
-      pathname: 'search',
-      search: `?q=${searchInput}`,
-    })
+    if (searchInput.length > 0 && searchInput) {
+      navigate({
+        pathname: 'search',
+        search: `?q=${searchInput}`,
+      })
+    }
   }
 
   return (
@@ -88,52 +90,54 @@ export default function Header() {
           {/* mobile search box */}
           <div>
             <AiOutlineSearch
-              className='text-2xl md:hidden'
+              className='text-2xl md:hidden cursor-pointer'
               onClick={() => setSearchModal(true)}
             />
           </div>
           {/* mobile menu */}
-          <div className='md:hidden'>
-            <Menu as='div' className='relative inline-block text-left'>
-              <div>
-                <Menu.Button className='inline-flex w-full justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75'>
-                  <AiOutlineMenu className='text-xl' />
-                </Menu.Button>
-              </div>
-              <Transition
-                as={Fragment}
-                enter='transition ease-out duration-100'
-                enterFrom='transform opacity-0 scale-95'
-                enterTo='transform opacity-100 scale-100'
-                leave='transition ease-in duration-75'
-                leaveFrom='transform opacity-100 scale-100'
-                leaveTo='transform opacity-0 scale-95'
-              >
-                <Menu.Items className='absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
-                  <div className='px-1 py-1 '>
-                    {filteredNavigation.map((nav) => {
-                      return (
-                        <Menu.Item>
-                          {({ active }) => (
-                            <NavLink
-                              to={nav.href}
-                              className={`${
-                                active
-                                  ? 'bg-violet-400 text-white'
-                                  : 'text-gray-900'
-                              } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                            >
-                              {nav.name}
-                            </NavLink>
-                          )}
-                        </Menu.Item>
-                      )
-                    })}
-                  </div>
-                </Menu.Items>
-              </Transition>
-            </Menu>
-          </div>
+          {isAuth && (
+            <div className='md:hidden'>
+              <Menu as='div' className='relative inline-block text-left'>
+                <div>
+                  <Menu.Button className='inline-flex w-full justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75'>
+                    <AiOutlineMenu className='text-xl' />
+                  </Menu.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  enter='transition ease-out duration-100'
+                  enterFrom='transform opacity-0 scale-95'
+                  enterTo='transform opacity-100 scale-100'
+                  leave='transition ease-in duration-75'
+                  leaveFrom='transform opacity-100 scale-100'
+                  leaveTo='transform opacity-0 scale-95'
+                >
+                  <Menu.Items className='absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none'>
+                    <div className='px-1 py-1 '>
+                      {filteredNavigation.map((nav) => {
+                        return (
+                          <Menu.Item>
+                            {({ active }) => (
+                              <NavLink
+                                to={nav.href}
+                                className={`${
+                                  active
+                                    ? 'bg-violet-400 text-white'
+                                    : 'text-gray-900'
+                                } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                              >
+                                {nav.name}
+                              </NavLink>
+                            )}
+                          </Menu.Item>
+                        )
+                      })}
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
+          )}
         </div>
       </nav>
       <Modal isOpen={searchModal} closeModal={setSearchModal}>

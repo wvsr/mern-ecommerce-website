@@ -43,18 +43,17 @@ const newOrder = asyncHandler(async (req, res) => {
 // @Access Private, Admin only
 
 const getAllOrders = asyncHandler(async (req, res) => {
-  const pageOptions = {
-    page: parseInt(req.query.page, 10) || 0,
-    limit: parseInt(req.query.limit, 10) || 20,
-  }
+  const { page = 1, limit = 10 } = req.query
   const orders = await Order.find({})
     .select('-shippingLocation')
-    .skip(pageOptions.page * pageOptions.limit)
-    .limit(pageOptions.limit)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
     .sort({ createdAt: -1 })
 
   if (orders) {
-    res.status(200).json(orders)
+    res
+      .status(200)
+      .json({ totalPages: Math.ceil(count / limit), currentPage: page, orders })
   }
 
   res.status(404)

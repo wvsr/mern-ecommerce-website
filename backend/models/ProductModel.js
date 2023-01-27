@@ -1,16 +1,18 @@
 const mongoose = require('mongoose')
 
-const rating = mongoose.Schema({
+const ratingSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
+  name: {
+    type: String,
+    required: true,
+  },
   star: {
     type: Number,
     required: true,
-    min: 1,
-    max: 5,
   },
   message: {
     type: String,
@@ -18,7 +20,7 @@ const rating = mongoose.Schema({
   },
 })
 
-const productModel = mongoose.Schema(
+const productModel = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -36,15 +38,7 @@ const productModel = mongoose.Schema(
       type: String,
       required: true,
     },
-    rating: [rating],
-    active: {
-      type: Boolean,
-      required: true,
-    },
-    stockOut: {
-      type: Boolean,
-      required: false,
-    },
+    rating: [ratingSchema],
     star: {
       type: Number,
       required: true,
@@ -58,12 +52,12 @@ const productModel = mongoose.Schema(
   }
 )
 
-productModel.pre('save', function (next) {
-  if (!this.isModified('rating')) {
-    next()
-  }
-  const star =
-    this.rating.reduce((sum, rating) => sum + rating.star, 0) /
-    product.rating.lenght
-})
+// productModel.pre('save', function (next) {
+//   if (!this.isModified('rating')) {
+//     next()
+//   }
+//   const star =
+//     this.rating.reduce((sum, rating) => sum + rating.star, 0) /
+//     this.rating.lenght
+// })
 module.exports = mongoose.model('Product', productModel)

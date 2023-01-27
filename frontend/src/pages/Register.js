@@ -1,10 +1,11 @@
 import React, { useState, useContext } from 'react'
 import { AppContext } from '../context/AppContext'
+import useAuth from '../hooks/useAuth'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
 export default function Register() {
-  const { user, setUser } = useContext(AppContext).auth
+  const { user, setUser } = useAuth()
   const [userName, setUserName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

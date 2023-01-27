@@ -1,16 +1,18 @@
 import React, { useContext } from 'react'
 import { AppContext } from '../../context/AppContext'
 import HeroImage from '../sections/../../assets/hero-image.jpg'
+import useAuth from '../../hooks/useAuth'
 
 function Hero() {
   const { setLoginModal } = useContext(AppContext).authModal
+  const { isAuth } = useAuth()
   return (
     <>
       <section className='min-h-56 flex justify-center items-center flex-1 shrink-0 bg-gray-100 overflow-hidden shadow-lg rounded-lg relative py-10 2xl:py-20 mx-2'>
         <img
           src={HeroImage}
           loading='lazy'
-          alt='Photo by Fakurian Design'
+          alt='hero image'
           className='w-full h-full object-cover object-center absolute inset-0'
         />
 
@@ -23,21 +25,16 @@ function Hero() {
             Unique Books Await at Our Bookstore
           </h1>
 
-          <div className='w-full flex flex-col sm:flex-row sm:justify-center gap-2.5'>
-            <button
-              onClick={() => setLoginModal(true)}
-              className='inline-block bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
-            >
-              Login
-            </button>
-
-            <a
-              href='#'
-              className='inline-block bg-gray-200 hover:bg-gray-300 focus-visible:ring ring-indigo-300 text-gray-500 active:text-gray-700 text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
-            >
-              Trending
-            </a>
-          </div>
+          {!isAuth && (
+            <div className='w-full flex flex-col sm:flex-row sm:justify-center gap-2.5'>
+              <button
+                onClick={() => setLoginModal(true)}
+                className='inline-block bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
+              >
+                Login
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </>

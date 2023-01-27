@@ -1,8 +1,19 @@
 const express = require('express')
-const route = express.Router()
+const router = express.Router()
+const {
+  getAllOrders,
+  newOrder,
+  changeOrderStatus,
+  deleteOrder,
+  getOrderById,
+  getMyOrders,
+} = require('../controller/orderController.js')
 
-route.get('/', (req, res) => {
-  res.send('hello world')
-})
+router.route('/').post(newOrder).delete(deleteOrder)
 
-module.exports = route
+router.route('/all').get(getAllOrders)
+router.put('change-status', changeOrderStatus)
+router.get('/my-orders', getMyOrders)
+router.get('/:id', getOrderById)
+
+module.exports = router

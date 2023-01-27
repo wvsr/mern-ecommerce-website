@@ -8,6 +8,8 @@ import NotFound from './pages/NotFound'
 import ProductPage from './pages/ProductPage'
 import CartList from './pages/CartList'
 import Search from './pages/Search'
+import Profile from './pages/Profile'
+import Products from './pages/dashboard/Products'
 import Header from './components/sections/Header'
 import Footer from './components/sections/Footer'
 
@@ -23,6 +25,8 @@ export default function App() {
         <Route path='register' element={<Register />} />
         <Route path='cart' element={<CartList />} />
         <Route path='search' element={<Search />} />
+        <Route path='profile' element={<Profile />} />
+        <Route path='dashboard/product' element={<Products />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
       <Footer />

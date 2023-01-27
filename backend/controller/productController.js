@@ -1,27 +1,27 @@
 const User = require('../models/userModel.js')
 const Product = require('../models/productModel.js')
 const asyncHandler = require('express-async-handler')
+const mongoose = require('mongoose')
+const { validationResult } = require('express-validator')
 
-// @Route POST api/products/
+// @Route POST api/product/
 // @Desc get all products
 // @Access Public
 
 const getAllProducts = asyncHandler(async (req, res) => {
-  const pageOptions = {
-    page: parseInt(req.query.page, 10) || 0,
-    limit: parseInt(req.query.limit, 10) || 20,
-  }
-  const productCount = await Product.find({}).countDocuments()
-  const numberOfPages = userCount / pageOptions.limit
-
-  // finding active products without description
-  let products = await Product.find({ active: true, stockOut: false })
-    .select('-description -active -rating')
-    .skip(pageOptions.page * pageOptions.limit)
-    .limit(pageOptions.limit)
+  const { page = 1, limit = 20 } = req.query
+  const count = await Product.countDocuments()
+  let products = await Product.find({})
+    .select('-description -rating')
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
     .sort({ createdAt: -1 })
 
-  res.json({ productCount, numberOfPages, products })
+  res.json({
+    products,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+  })
 })
 
 // @Route POST api/product/
@@ -29,14 +29,19 @@ const getAllProducts = asyncHandler(async (req, res) => {
 // @Access Private, Admin only
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { title, description, price, active, poster } = req.body
+  // validating data
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+  const { title, description, price } = req.body
   const product = await Product.create({
     title,
     description,
     price,
-    active,
-    poster,
+    poster: req.file.path,
   })
+  console.log(product)
   res.status(201).json({ message: 'Product created successfully' })
 })
 
@@ -45,11 +50,15 @@ const createProduct = asyncHandler(async (req, res) => {
 // @Access Public
 
 const getProduct = asyncHandler(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(404)
+    throw new Error('Invalid product id')
+  }
   const product = await Product.findById(req.params.id)
   if (product) {
-    res.json({
-      product,
-      reviw: product.rating.slice(0, 5),
+    return res.json({
+      ...product._doc,
+      rating: product.rating.slice(0, 5),
     })
   }
   res.status(404)
@@ -66,15 +75,16 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.title = req.body.title || product.title
     product.description = req.body.description || product.description
     product.price = req.body.price || product.price
-    product.active = req.body.active || product.active
     product.poster = req.body.poster || product.poster
-    product.stockOut = req.body.stockOut || product.stockOut
-    res.json({ message: 'Product updated successfully' })
+    product.save()
+    console.log(product)
+    return res.json({ message: 'Product updated successfully', product })
   }
 
   res.status(404)
   throw new Error('Product not found')
 })
+
 // @Route DELETE api/product/:id
 // @Desc deleting product
 // @Access Privates, Admin only
@@ -90,27 +100,48 @@ const deleteProduct = asyncHandler(async (req, res) => {
   throw new Error('Product not found')
 })
 
-// @Route POSR api/products/review/:id
+// @Route POST api/product/review/:id
 // @Desc add review to product
 // @Access Private
 
 const addReview = asyncHandler(async (req, res) => {
-  const { star, comment } = req.body
-  const product = await Product.findById(req.params.id)
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() })
+  }
+  if (req.params.id) {
+    if (!mongoose.isValidObjectId(req.params.id))
+      throw new Error('Invalid id: ' + req.params.id)
+  }
+  const { star, message } = req.body
+  let product = await Product.findById(req.params.id)
   const user = await User.findById(req.user._id)
   const alredyBought =
-    user && user?.buyingHistory.find((e) => e === req.user._id)
+    user && user?.buyingHistory.find((e) => e.toString() === req.params.id)
   if (product && alredyBought) {
-    const alreadyRated = product.rating.find((e) => e.user === req.user._id)
+    // check if product is already rated
+    const alreadyRated = product.rating.find(
+      (e) => e.user.toString() === req.user.id
+    )
+
     if (alreadyRated) {
       res.status(400)
       throw new Error('You have already rated this product')
     }
-    product.rating.unshift({
+    // push the review
+    product.rating = product.rating.concat({
       user: req.user._id,
       star,
+      message,
+      name: req.user.name,
     })
-    res.status(201).json({ message: 'Review added successfully' })
+    product.star =
+      product.rating.reduce((sum, rating) => sum + rating.star, 0) /
+      product.rating.length
+    await product.save()
+    return res
+      .status(201)
+      .json({ message: 'Review added successfully', product })
   }
 
   if (!alredyBought) {
@@ -126,9 +157,9 @@ const addReview = asyncHandler(async (req, res) => {
 // @Access Public
 
 const getReviews = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.reviewId)
+  const product = await Product.findById(req.params.id)
   if (product) {
-    res.json(product.rating)
+    return res.json(product.rating.slice(0, 20))
   }
 
   res.status(404)
@@ -140,28 +171,28 @@ const getReviews = asyncHandler(async (req, res) => {
 // @Access Private
 
 const deleteReview = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.productId)
-  if (product) {
-    product.rating = product.rating.filter((e) => e.id !== req.params.reviewId)
-    product.save()
-    res.status(202)
-    res.json({ message: 'Review deleted successfully' })
+  // check the object id
+  if (req.params.id) {
+    if (!mongoose.isValidObjectId(req.params.id))
+      throw new Error('Invalid id: ' + req.params.id)
   }
-  res.status(404)
-  throw new Error('Product not found')
-})
-
-//@Route PUT /api/product/change-status/:id
-//@Desc change product status
-//@Access Private, Admin Only
-
-const changeStatus = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
   if (product) {
-    product.active = !product.active
-    product.save()
+    if (!product.rating.find((e) => e.user.toString() === req.user.id)) {
+      throw new Error('You did not rate it')
+    }
+    console.log(product.rating.length)
+    product.rating = product.rating.filter((e) => {
+      e.id.toString() !== req.params.id
+    })
+    console.log(product.rating.length)
+    await product.save()
+    res.status(202)
+    return res.json({
+      message: 'Review deleted successfully',
+      rating: product.rating,
+    })
   }
-
   res.status(404)
   throw new Error('Product not found')
 })
@@ -170,16 +201,25 @@ const changeStatus = asyncHandler(async (req, res) => {
 //@Desc search product
 //@Access Private
 
-const searchProduct = asyncHandler(async (req, res) => {
-  const { search } = req.query
-  const searchTerm = RegExp(search, 'i')
+const searchProducts = asyncHandler(async (req, res) => {
+  const { query, page = 1, limit = 20 } = req.query
 
+  if (!query) return res.redirect('/')
+  const searchTerm = RegExp(query, 'i')
   const products = await Product.find(
     { $text: { $search: searchTerm } },
     { score: { $meta: 'textScore' } }
-  ).sort({ score: { $meta: 'textScore' } })
+  )
+    .select('-description')
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .sort({ score: { $meta: 'textScore' } })
 
-  res.json(products)
+  res.json({
+    products,
+    totalPages: Math.ceil(count / limit),
+    currentPage: page,
+  })
 })
 
 module.exports = {
@@ -191,6 +231,5 @@ module.exports = {
   addReview,
   getReviews,
   deleteReview,
-  changeStatus,
-  searchProduct,
+  searchProducts,
 }

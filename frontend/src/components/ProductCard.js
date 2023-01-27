@@ -5,13 +5,13 @@ export default function ProductCard(product) {
   return (
     <div>
       <Link
-        to={`/product/${product.id}`}
+        to={`/product/${product._id}`}
         className='group min-w-full h-56 md:min-w-lg md:h-96 block bg-gray-100 rounded-lg overflow-hidden shadow-lg relative mb-2 lg:mb-3'
       >
         <img
-          src={product.thumbnail}
+          src={product.poster}
           loading='lazy'
-          alt='Photo by Nick Karvounis'
+          alt={product.title}
           className='w-full h-full object-cover object-center group-hover:scale-110 transition duration-200'
         />
       </Link>

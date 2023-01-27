@@ -33,7 +33,10 @@ router
 router.post(
   '/change-password',
   [
-    body('password', 'this password is invalid').isLength({ min: 8, max: 62 }),
+    body('oldPassword', 'this password is invalid').isLength({
+      min: 8,
+      max: 62,
+    }),
     body(
       'newPassword',
       'Your password must be at least 8 characters long'
