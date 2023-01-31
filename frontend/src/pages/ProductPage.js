@@ -1,28 +1,47 @@
 import React, { useContext, useEffect } from 'react'
 import { useFetch } from '../hooks/fetchData'
 import { AppContext } from '../context/AppContext'
-import { useParams, useNavigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 //icons
 import { AiFillStar, AiOutlineShoppingCart } from 'react-icons/ai'
 import { MdLocalShipping } from 'react-icons/md'
+import { toast } from 'react-toastify'
 
 export default function ProductPage() {
   const navigate = useNavigate()
   const { setLoginModal } = useContext(AppContext).authModal
   const { id } = useParams()
   const { data, isLoading, error } = useFetch(`/product/${id}`)
+  const { isAuth } = useAuth()
   console.log(data)
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
 
-  const addToCart = () => {
-    const carts = JSON.parse(localStorage.getItem('cart')) || []
-    console.log(carts)
-    const cart = carts.push({ titel: 'sami' })
-    localStorage.setItem('cart', cart)
+  function addToCart() {
+    let products = []
+    if (localStorage.getItem('products') && data._id) {
+      products = JSON.parse(localStorage.getItem('products'))
+    }
+    const product = products.find((e) => e._id === data._id)
+    if (product) {
+      products = products.filter((e) => e._id !== data._id)
+      products.push({ ...product, quantity: product.quantity + 1 })
+    } else {
+      products.push({
+        _id: data?._id,
+        poster: data?.poster,
+        title: data?.title,
+        price: data?.price,
+        quantity: 1,
+      })
+    }
+    localStorage.setItem('products', JSON.stringify(products))
+    toast('Product added to the cart')
   }
+
   if (error) return navigate('')
   const PrdouctReview = () => {
     return (
@@ -80,7 +99,7 @@ export default function ProductPage() {
                       Fancy Brand
                     </span>
                     <h2 className='text-gray-800 text-2xl lg:text-3xl font-bold'>
-                      Pullover with pattern
+                      {data?.title}
                     </h2>
                   </div>
                   <div className='flex items-center mb-6 md:mb-10'>
@@ -113,14 +132,23 @@ export default function ProductPage() {
                     <span className='text-sm'>2-4 day shipping</span>
                   </div>
                   <div className='flex md:block gap-2.5 md:space-y-5'>
-                    <button
-                      onClick={() => setLoginModal(true)}
-                      href='#'
-                      className='inline-block w-full flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
-                    >
-                      Buy Now
-                    </button>
-
+                    {!isAuth && (
+                      <button
+                        onClick={() => setLoginModal(true)}
+                        href='#'
+                        className='inline-block w-full flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
+                      >
+                        Buy Now
+                      </button>
+                    )}
+                    {isAuth && (
+                      <Link
+                        to='cart'
+                        className='inline-block w-full flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
+                      >
+                        Buy Now
+                      </Link>
+                    )}
                     <button
                       onClick={addToCart}
                       href='#'

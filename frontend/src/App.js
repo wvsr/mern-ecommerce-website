@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
 import axios from 'axios'
 import { AppContext, AppContextProvider } from './context/AppContext'
+import PrivateRoute from './components/PrivateRoute'
+import AdminRoute from './components/AdminRoute'
 
 import Home from './pages/Home'
 import Register from './pages/Register'
@@ -26,7 +28,14 @@ export default function App() {
         <Route path='cart' element={<CartList />} />
         <Route path='search' element={<Search />} />
         <Route path='profile' element={<Profile />} />
-        <Route path='dashboard/product' element={<Products />} />
+        <Route
+          path='dashboard/product'
+          element={
+            <AdminRoute>
+              <Products />
+            </AdminRoute>
+          }
+        />
         <Route path='*' element={<NotFound />} />
       </Routes>
       <Footer />

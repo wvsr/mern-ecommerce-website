@@ -13,7 +13,7 @@ app.use(express.json())
 app.use(cors())
 connectDB()
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'))
 }
 // Cloudinary Configuration

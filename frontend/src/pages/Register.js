@@ -12,7 +12,7 @@ export default function Register() {
   const [errors, setErrors] = useState([])
   const [success, setSuccess] = useState(false)
   const navigate = useNavigate()
-
+  const { setLoginModal } = useContext(AppContext).authModal
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrors([])
@@ -114,6 +114,15 @@ export default function Register() {
         >
           Register new account
         </button>
+        <p className='text-base text-gray-600 my-4'>
+          Have a accound{' '}
+          <button
+            className='text-blue-700 px-2 py-2 bg-blue-100 outline-none'
+            onClick={() => setLoginModal(true)}
+          >
+            login
+          </button>
+        </p>
       </form>
     </div>
   )

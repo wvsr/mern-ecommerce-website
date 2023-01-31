@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useFetch } from '../../hooks/fetchData'
 import axios from 'axios'
 import Modal from '../../components/Modal'
+import Pagination from '../../components/Pagination'
 
 function Products() {
   const [productModal, setProductModal] = useState(false)
@@ -103,6 +104,7 @@ function Products() {
               ))}
           </tbody>
         </table>
+        <Pagination />
       </div>
 
       <Modal isOpen={productModal} closeModal={setProductModal}>

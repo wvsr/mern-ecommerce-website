@@ -22,6 +22,7 @@ router
   .route('/')
   .get(getAllProducts)
   .post(
+    authUser,
     upload.single('poster'),
     [
       body('title', 'title lenght atleast 3 charechter').isLength({

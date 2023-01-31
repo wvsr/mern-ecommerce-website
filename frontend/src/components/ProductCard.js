@@ -19,12 +19,12 @@ export default function ProductCard(product) {
       <div className='flex justify-between items-start gap-2 px-2'>
         <div className='flex flex-col'>
           <Link
-            to={`product/${product.id}`}
+            to={`product/${product._id}`}
             className='text-gray-800 hover:text-gray-500 text-lg lg:text-xl font-bold transition duration-100'
           >
             {product.title}
           </Link>
-          <span className='text-gray-500'>by Cool Brand</span>
+          <span className='text-gray-500'>by {product.author}</span>
         </div>
 
         <div className='flex flex-col items-end'>

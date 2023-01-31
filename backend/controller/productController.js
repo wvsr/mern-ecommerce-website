@@ -205,20 +205,22 @@ const searchProducts = asyncHandler(async (req, res) => {
   const { query, page = 1, limit = 20 } = req.query
 
   if (!query) return res.redirect('/')
+
   const searchTerm = RegExp(query, 'i')
+  const count = await Product.countDocuments()
   const products = await Product.find(
     { $text: { $search: searchTerm } },
     { score: { $meta: 'textScore' } }
   )
-    .select('-description')
+    .sort({ score: { $meta: 'textScore' } })
+    .select('-description -updatedAt -createdAt -rating -score')
     .limit(limit * 1)
     .skip((page - 1) * limit)
-    .sort({ score: { $meta: 'textScore' } })
 
   res.json({
     products,
-    totalPages: Math.ceil(count / limit),
-    currentPage: page,
+    totalPages: products === [] ? Math.ceil(count / limit) : 0,
+    currentPage: Number(page),
   })
 })
 
