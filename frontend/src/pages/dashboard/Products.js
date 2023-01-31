@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useFetch } from '../../hooks/fetchData'
 import axios from 'axios'
 import Modal from '../../components/Modal'
+import Loader from '../../components/Loader'
 import Pagination from '../../components/Pagination'
 
 function Products() {
@@ -14,7 +15,12 @@ function Products() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const { data: productsList, isLoading, error } = useFetch('/product')
+  const {
+    data: productsList,
+    isLoading,
+    error,
+    setData: setProductData,
+  } = useFetch('/product')
   console.log(productsList?.products)
   const handleProductSubmit = async (e) => {
     e.preventDefault()
@@ -34,6 +40,7 @@ function Products() {
         },
       })
       setSuccess(true)
+      setProductData([submitUser, ...productsList])
       setProductName('')
       setProductDescription('')
       setProductPrice('')
@@ -46,6 +53,42 @@ function Products() {
     }
     setLoading(false)
   }
+  const TableRow = (item) => {
+    const handleDelete = async () => {
+      try {
+        const deleteDoc = await axios.delete(`/product/${item._id}`)
+        setProductData(productsList.filter((e) => e._id !== item._id))
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    return (
+      <tr className='bg-white border-b'>
+        <th
+          scope='row'
+          className='px-6 py-4 font-medium text-gray-900 whitespace-nowrap'
+        >
+          {item.title}
+        </th>
+        <td className='px-6 py-4'>{item.star}</td>
+        <td className='px-6 py-4'>{new Date(item.createdAt).toDateString()}</td>
+        <td className='px-6 py-4'>$ {item.price}</td>
+        <td className='px-6 py-4'>
+          <button href='#' className='font-medium text-blue-600 mr-3'>
+            Edit
+          </button>
+          <button
+            href='#'
+            className='font-medium text-red-600'
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    )
+  }
+  if (error) return <h1>Error happern</h1>
   return (
     <div className='container max-w-screen-lg mx-auto py-3 px-3'>
       <button
@@ -55,57 +98,39 @@ function Products() {
         Add product
       </button>
       {/* // add product modal */}
-
-      <div class='relative overflow-x-auto shadow-md sm:rounded-lg'>
-        <table class='w-full text-sm text-left text-gray-500'>
-          <thead class='text-xs text-gray-700 uppercase bg-gray-50'>
-            <tr>
-              <th scope='col' class='px-6 py-3'>
-                Product name
-              </th>
-              <th scope='col' class='px-6 py-3'>
-                star
-              </th>
-              <th scope='col' class='px-6 py-3'>
-                Created At
-              </th>
-              <th scope='col' class='px-6 py-3'>
-                Price
-              </th>
-              <th scope='col' class='px-6 py-3'>
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(productsList.products) &&
-              productsList.products.map((item) => (
-                <tr class='bg-white border-b'>
-                  <th
-                    scope='row'
-                    class='px-6 py-4 font-medium text-gray-900 whitespace-nowrap'
-                  >
-                    {item.title}
+      {isLoading && <Loader />}
+      {productsList && (
+        <>
+          <div className='relative overflow-x-auto shadow-md sm:rounded-lg'>
+            <table className='w-full text-sm text-left text-gray-500'>
+              <thead className='text-xs text-gray-700 uppercase bg-gray-50'>
+                <tr>
+                  <th scope='col' className='px-6 py-3'>
+                    Product name
                   </th>
-                  <td class='px-6 py-4'>{item.star}</td>
-                  <td class='px-6 py-4'>
-                    {new Date(item.createdAt).toDateString()}
-                  </td>
-                  <td class='px-6 py-4'>$ {item.price}</td>
-                  <td class='px-6 py-4'>
-                    <a href='#' class='font-medium text-blue-600 mr-3'>
-                      Edit
-                    </a>
-                    <a href='#' class='font-medium text-red-600'>
-                      Delete
-                    </a>
-                  </td>
+                  <th scope='col' className='px-6 py-3'>
+                    star
+                  </th>
+                  <th scope='col' className='px-6 py-3'>
+                    Created At
+                  </th>
+                  <th scope='col' className='px-6 py-3'>
+                    Price
+                  </th>
+                  <th scope='col' className='px-6 py-3'>
+                    Action
+                  </th>
                 </tr>
-              ))}
-          </tbody>
-        </table>
-        <Pagination />
-      </div>
+              </thead>
+              <tbody>
+                {Array.isArray(productsList.products) &&
+                  productsList.products.map((item) => <TableRow {...item} />)}
+              </tbody>
+            </table>
+          </div>
+          <Pagination />
+        </>
+      )}
 
       <Modal isOpen={productModal} closeModal={setProductModal}>
         <form onSubmit={handleProductSubmit}>
@@ -125,10 +150,10 @@ function Products() {
               </div>
             )}
           </div>
-          <div class='mb-6'>
+          <div className='mb-6'>
             <label
               htmlFor='product-name'
-              class='block mb-2 text-sm font-medium text-gray-900'
+              className='block mb-2 text-sm font-medium text-gray-900'
             >
               product name
             </label>
@@ -136,7 +161,7 @@ function Products() {
               type='text'
               id='product-name'
               placeholder='type your product name'
-              class='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+              className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
               onChange={(e) => setProductName(e.target.value)}
               value={productName}
               required
@@ -144,13 +169,13 @@ function Products() {
           </div>
           <div className='mb-6'>
             <label
-              class='block mb-2 text-sm font-medium text-gray-900'
+              className='block mb-2 text-sm font-medium text-gray-900'
               for='poster'
             >
               Poster
             </label>
             <input
-              class='block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50'
+              className='block w-full text-lg text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50'
               id='poster'
               type='file'
               onChange={(e) => {
@@ -158,10 +183,10 @@ function Products() {
               }}
             />
           </div>
-          <div class='mb-6'>
+          <div className='mb-6'>
             <label
               htmlFor='product-description'
-              class='block mb-2 text-sm font-medium text-gray-900'
+              className='block mb-2 text-sm font-medium text-gray-900'
             >
               product description
             </label>
@@ -170,16 +195,16 @@ function Products() {
               id='product-description'
               placeholder='type your product description'
               rows={6}
-              class='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+              className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
               onChange={(e) => setProductDescription(e.target.value)}
               value={productDescription}
               required
             />
           </div>
-          <div class='mb-6'>
+          <div className='mb-6'>
             <label
               htmlFor='product-price'
-              class='block mb-2 text-sm font-medium text-gray-900'
+              className='block mb-2 text-sm font-medium text-gray-900'
             >
               price
             </label>
@@ -187,7 +212,7 @@ function Products() {
               type='number'
               id='product-price'
               placeholder='type your product price'
-              class='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
+              className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-none'
               onChange={(e) => setProductPrice(e.target.value)}
               required
               value={productPrice}

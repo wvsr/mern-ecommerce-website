@@ -19,7 +19,7 @@ function useFetch(url) {
     })()
   }, [url])
 
-  return { data, error, isLoading }
+  return { data, error, isLoading, setData }
 }
 
 export { useFetch }

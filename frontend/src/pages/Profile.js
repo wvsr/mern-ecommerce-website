@@ -19,7 +19,7 @@ function Profile() {
         <p className='text-base text-gray-500 py-4'>want to logout?</p>
         <button
           type='button'
-          class='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2'
+          className='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2'
         >
           Log Out
         </button>

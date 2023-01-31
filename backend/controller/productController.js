@@ -90,6 +90,10 @@ const updateProduct = asyncHandler(async (req, res) => {
 // @Access Privates, Admin only
 
 const deleteProduct = asyncHandler(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(404)
+    throw new Error('Invalid user ID')
+  }
   const product = await Product.findById(req.params.id)
   if (product) {
     await product.remove()

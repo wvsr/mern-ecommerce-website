@@ -16,7 +16,10 @@ import Header from './components/sections/Header'
 import Footer from './components/sections/Footer'
 
 axios.defaults.baseURL = 'http://localhost:5000/api/'
-
+const token = localStorage.getItem('token')?.token
+if (token) {
+  axios.defaults.headers.common['authorization'] = `Bearer ${token}`
+}
 export default function App() {
   return (
     <AppContextProvider>
