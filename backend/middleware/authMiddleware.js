@@ -35,6 +35,7 @@ const adminUser = asyncHandler(async (req, res, next) => {
     throw new Error('Not authorized')
   }
 })
+
 module.exports = {
   authUser,
   adminUser,

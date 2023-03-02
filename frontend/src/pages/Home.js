@@ -6,8 +6,6 @@ import Hero from '../components/sections/Hero'
 
 export default function Home() {
   const { data, error, isLoading } = useFetch('/product')
-  console.log(data)
-
   if (error) return <h1>Error Happen</h1>
 
   return (

@@ -16,7 +16,8 @@ import Header from './components/sections/Header'
 import Footer from './components/sections/Footer'
 
 axios.defaults.baseURL = 'http://localhost:5000/api/'
-const token = localStorage.getItem('token')?.token
+const token = JSON.parse(localStorage.getItem('user'))?.token
+console.log(token)
 if (token) {
   axios.defaults.headers.common['authorization'] = `Bearer ${token}`
 }
@@ -30,7 +31,14 @@ export default function App() {
         <Route path='register' element={<Register />} />
         <Route path='cart' element={<CartList />} />
         <Route path='search' element={<Search />} />
-        <Route path='profile' element={<Profile />} />
+        <Route
+          path='profile'
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
         <Route
           path='dashboard/product'
           element={

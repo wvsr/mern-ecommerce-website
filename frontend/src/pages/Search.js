@@ -36,13 +36,13 @@ export default function Search() {
               <ProductCard {...product} key={product.id} />
             ))}
         </div>
+
         <Pagination
           totalPages={data.totalPages}
           currentPage={data.currentPage}
           queryParams={searchQuery}
           searchQuery
         />
-        {console.log(data?.currentPage < data?.totalPages)}
       </div>
     </div>
   )

@@ -9,8 +9,7 @@ const orderSchema = mongoose.Schema({
   orderItems: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true,
+      ref: 'user',
     },
   ],
   totalPrice: {
@@ -29,6 +28,6 @@ const orderSchema = mongoose.Schema({
   },
 })
 
-const Order = mongoose.model('Order', orderSchema)
+const order = mongoose.model('Order', orderSchema)
 
-module.exports = Order
+module.exports = order

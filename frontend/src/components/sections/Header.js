@@ -4,6 +4,7 @@ import { AppContext } from '../../context/AppContext'
 import useAuth from '../../hooks/useAuth'
 // components
 import Modal from '../Modal'
+import Logo from '../../assets/logo.png'
 // icons
 import { AiOutlineSearch, AiOutlineDown, AiOutlineMenu } from 'react-icons/ai'
 import { RiShoppingCart2Line } from 'react-icons/ri'
@@ -15,14 +16,14 @@ export default function Header() {
   const searchQuery = searchParams.get('q')
 
   const navigation = [
-    { name: 'Profile', href: 'profile', private: true },
-    { name: 'Register', href: 'register', private: false },
+    { name: 'Profile', href: '/profile', private: true },
+    { name: 'Register', href: '/register', private: false },
   ]
-  const { isAuth, user } = useAuth()
+  const { isAuth } = useAuth()
 
   const filteredNavigation = isAuth
-    ? navigation
-    : navigation.filter((item) => true !== item.private)
+    ? navigation.filter((item) => item.private)
+    : navigation.filter((item) => !item.private)
 
   const [searchModal, setSearchModal] = useState(false)
   const [searchInput, setSearchInput] = useState(() => searchQuery || '')
@@ -45,23 +46,27 @@ export default function Header() {
       <nav className='bg-slate-100 flex justify-between items-center border-gray-200 px-2 sm:px-4 py-2.5 md:py-1 rounded top-0 z-50 sticky'>
         <div id='logo flex-1'>
           <NavLink to=''>
-            <h1 className='text-2xl bold'>SAMISTORE</h1>
+            <img className='text-2xl bold' src={Logo} width={130} aly='logo' />
           </NavLink>
         </div>
+        {/* learge screen nav  */}
         <div className='flex justify-center items-center gap-6'>
-          <ul className='space-x-2 text-gray-700 fond-bold capitalize hidden md:block'>
+          <ul className=' space-x-2 text-gray-700 fond-bold capitalize hidden md:flex'>
             {filteredNavigation.map((nav) => {
               return (
-                <li>
-                  <NavLink
-                    to={nav.href}
-                    className={({ isActive }) =>
-                      isActive ? 'text-indigo-400' : ''
-                    }
-                  >
-                    {nav.name}
-                  </NavLink>
-                </li>
+                <>
+                  <li>
+                    <NavLink
+                      to={nav.href}
+                      className={({ isActive }) =>
+                        isActive ? 'text-indigo-400' : ''
+                      }
+                      key={nav.href}
+                    >
+                      {nav.name}
+                    </NavLink>
+                  </li>
+                </>
               )
             })}
           </ul>

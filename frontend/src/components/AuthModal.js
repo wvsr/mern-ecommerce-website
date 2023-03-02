@@ -1,11 +1,12 @@
 import React, { useContext, useState } from 'react'
 import Model from './Modal'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 
 function AuthModel(props) {
   const { user, setUser } = useContext(AppContext).auth
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState([])
@@ -20,9 +21,12 @@ function AuthModel(props) {
         email,
         password,
       })
-      setUser(user)
+      setUser(submitUser?.data)
       setSuccess(true)
-      setTimeout(() => props.closeModal(false), 2000)
+      setTimeout(() => {
+        navigate('/')
+        props.closeModal(false)
+      }, 1000)
       localStorage.setItem('user', JSON.stringify(submitUser?.data))
     } catch (error) {
       console.error(

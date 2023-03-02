@@ -1,5 +1,5 @@
 const User = require('../models/userModel.js')
-const Product = require('../models/productModel.js')
+const Product = require('../models/ProductModel.js')
 const asyncHandler = require('express-async-handler')
 const mongoose = require('mongoose')
 const { validationResult } = require('express-validator')
@@ -208,7 +208,7 @@ const deleteReview = asyncHandler(async (req, res) => {
 const searchProducts = asyncHandler(async (req, res) => {
   const { query, page = 1, limit = 20 } = req.query
 
-  if (!query) return res.redirect('/')
+  if (!query) throw new Error('Invalid query')
 
   const searchTerm = RegExp(query, 'i')
   const count = await Product.countDocuments()
@@ -223,7 +223,7 @@ const searchProducts = asyncHandler(async (req, res) => {
 
   res.json({
     products,
-    totalPages: products === [] ? Math.ceil(count / limit) : 0,
+    totalPages: Math.ceil(count / limit),
     currentPage: Number(page),
   })
 })

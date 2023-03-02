@@ -2,35 +2,36 @@ const Order = require('../models/orederModel.js')
 const Product = require('../models/ProductModel')
 const asyncHandler = require('express-async-handler')
 
-// @Route POST api/order/new
+// @Route POST api/order/
 // @Desc Creating new Order
 // @Access Private
 
 const newOrder = asyncHandler(async (req, res) => {
   const { orderItems, shippingLocation } = req.body
-
-  const prices = orderItems.map((item) => {
-    const product = Product.findByID(item)
-    if (product) {
+  const prices = await Promise.all(
+    orderItems.map(async (item) => {
+      const product = await Product.findById(item[0])
+      if (!product) {
+        throw new Error(`Invalid product Id`)
+      }
       return product.price
-    }
-    throw new Error('Invalid product ID')
-  })
-
+    })
+  )
   const totalPrice = prices.reduce((acc, item) => {
     return acc + item
   }, 0)
 
   const order = await Order.create({
-    orderItems,
+    orderItems: orderItems.map((item) => item[0]),
     shippingLocation,
     userId: req.user.id,
     totalPrice,
   })
 
   if (order) {
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Order created successfully',
+      order,
     })
   }
 

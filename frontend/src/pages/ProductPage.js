@@ -135,7 +135,6 @@ export default function ProductPage() {
                     {!isAuth && (
                       <button
                         onClick={() => setLoginModal(true)}
-                        href='#'
                         className='inline-block w-full flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
                       >
                         Buy Now
@@ -143,7 +142,7 @@ export default function ProductPage() {
                     )}
                     {isAuth && (
                       <Link
-                        to='cart'
+                        to='/cart'
                         className='inline-block w-full flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 focus-visible:ring ring-indigo-300 text-white text-sm md:text-base font-semibold text-center rounded-lg outline-none transition duration-100 px-8 py-3'
                       >
                         Buy Now
