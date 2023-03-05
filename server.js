@@ -2,6 +2,7 @@ const express = require('express')
 const dotenv = require('dotenv')
 const morgan = require('morgan')
 const cloudinary = require('cloudinary').v2
+const path = require('path')
 const cors = require('cors')
 const {
   notFound,
