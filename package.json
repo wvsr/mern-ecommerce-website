@@ -6,7 +6,7 @@
   "scripts": {
     "data:import": "node backend/seeder",
     "start:server": "node server.js",
-    "start:client": "cd client && npm build",
+    "start:client": "cd frontend && npm build",
     "dev": "nodemon server.js",
     "build": "npm run start:server & npm run start:client",
     "render-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
