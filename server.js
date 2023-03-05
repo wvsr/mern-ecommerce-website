@@ -11,15 +11,14 @@ const connectDB = require('./backend/utills/conectDb.js')
 const app = express()
 const PORT = process.env.PORT || 5000
 
+// Configurations
 dotenv.config()
 app.use(express.json())
 connectDB()
-
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'))
   app.use(cors())
 }
-// Cloudinary Configuration
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
