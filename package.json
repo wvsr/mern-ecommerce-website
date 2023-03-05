@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
     "data:import": "node backend/seeder",
-    "client": "npm start --prefix frontend",
-    "clientinstall": "npm install --prefix frontend",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start:server": "node server.js",
+    "start:client": "cd client && npm build",
+    "dev": "nodemon server.js",
+    "build": "npm run start:server & npm run start:client",
     "render-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
   },
   "author": "",
